@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html>  
-    <head>    
-        <title>Atividade Formativa 1 - Three JS</title>    
-        <script type="text/javascript" src="/js/three.js"></script>    
-        <script type="text/javascript" src="/js/jquery.min.js">
-        </script>    
+    <head>  
+        <meta charset="utf-8" />  
+        <title>Efolio A - Computacao Grafica</title>    
         <style>        
             body{            
                 margin: 0;
@@ -20,9 +18,94 @@
         </style>  
     </head>  
     <body>
-        <!-- Código Javascript que executa as funções solicitadas -->    
-        <script type="text/javascript">    
-              
-        </script>  
+        <div id="WebGL-output"></div>
     </body>
+    <script type="text/javascript" src="three.js"></script>
+    <script type="text/javascript" src="lineMP.js"></script>   
+    <!-- Código Javascript que executa as funções solicitadas -->    
+    <script type="text/javascript">  
+
+        //Criar a Cena
+        const cena = new THREE.Scene();
+
+
+
+        var camera = new THREE.PerspectiveCamera(75, innerWidth / window.innerHeight, 0.1,500);
+               var renderer = new THREE.WebGLRenderer();
+               renderer.setSize(window.innerWidth, window.innerHeight);
+               document.body.appendChild(renderer.domElement);
+
+
+
+
+        //Criar o plano
+        const planoGeometria = new THREE.PlaneGeometry(200,200);
+        const planoMaterial = new THREE.MeshBasicMaterial(
+            {
+                color: 0x00435f,
+                side: THREE.FrontSide
+            }
+        )
+        const plano = new THREE.Mesh(planoGeometria, planoMaterial);
+        cena.add(plano);
+
+        //Variaveis da Cena
+        let fatPixelSize = 10;                                          //Tamanho do Pixel "Gordo"
+        let centerRef = [10,10,10];                                     //Ponto de Referencial dos eixos
+        let limite = 100;
+
+        //Criar Eixos
+        const eixoMaterial = new THREE.LineBasicMaterial(               //Propriedades dos eixos
+            {
+                color:0x65a74f
+            }
+        );
+        const eixoX = [];
+        const eixoY = [];
+        eixoX.push( new THREE.Vector3(centerRef[0], centerRef[1], centerRef[2]));
+        eixoX.push( new THREE.Vector3(limite, centerRef[1], centerRef[2]));
+        eixoY.push( new THREE.Vector3(centerRef[0], centerRef[1], centerRef[2]));
+        eixoY.push( new THREE.Vector3(centerRef[0], limite, centerRef[2]));
+        const eixoXGeometria = new THREE.BufferGeometry().setFromPoints(eixoX);
+        const eixoYGeometria = new THREE.BufferGeometry().setFromPoints(eixoY); 
+        const eixoVertical = new THREE.Line(eixoYGeometria, eixoMaterial);
+        const eixoHorizontal = new THREE.Line(eixoXGeometria, eixoMaterial);
+        cena.add(eixoHorizontal);
+        cena.add(eixoVertical);
+
+        //Criar Grelha
+        const grelhaMaterial = new THREE.LineBasicMaterial(     //Propriedades das linhas da grelha
+            {
+                color: 0xf5be00
+            }
+        )
+        let xGrelha = [];                                       //Posições X da grelha
+        let yGrelha = [];                                       //Posições Y da grelha
+        //Criar as posições das linhas de grelha
+        for(let i = centerRef[0] + fatPixelSize, e = centerRef[1] + fatPixelSize; i <= limite; i+fatPixelSize, e+fatPixelSize){
+            xGrelha.push(i);
+            yGrelha.push(i);
+        }
+        const grelha = [];                      //Pontos das linhas da grelha
+
+
+        //Criar o ViewPort 2D
+
+        //Criar o viewPort 3D
+
+
+
+
+        let pontos = lineMP([1,6],[8,4]);
+        alert(pontos);
+        console.table(pontos);
+
+
+        camera.position.z=100;
+               camera.position.x=10;
+               camera.position.y=5;
+               renderer.render(cena,camera);
+
+
+    </script>  
 </html>
