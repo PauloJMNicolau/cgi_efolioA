@@ -3,34 +3,26 @@
     <head>  
         <meta charset="utf-8" />  
         <title>Efolio A - Computacao Grafica</title>    
-        <style>        
-            body{            
-                margin: 0;
-                overflow: hidden;
-            }    
-
-            /* Definir propriedades da área de canvas na página */
-            canvas {
-                display: block;
-                width:100%;
-                height: 100%;
-            }
-        </style>  
+        <link href="css/styles.css" rel="stylesheet" />    
+        <link rel="shortcut icon" type="image/jpg" href="favicon.ico"/>    
     </head>  
     <body>
-        <div id="WebGL-output"></div>
+        <div id="formulario">
+            <label for="coordenadas">Coordenadas:</label>
+            <input type="text" id="coordenadas" name="coordenadas">
+            <br />
+            <button type="button" onclick="desenhar()" >Desenhar</button>
+            <button type="button" onclick="apagar()">Apagar Retas</button>
     </body>
-    <script type="text/javascript" src="three.js"></script>
-    <script type="text/javascript" src="lineMP.js"></script>   
+    <script type="text/javascript" src="js/three.js"></script>
+    <script type="text/javascript" src="js/lineMP.js"></script>   
     <!-- Código Javascript que executa as funções solicitadas -->    
     <script type="text/javascript">  
 
         //Criar a Cena
-        const cena = new THREE.Scene();
+        const cena = new THREE.Scene();                                                 //Criar a cena
 
 
-
-        var camera = new THREE.PerspectiveCamera(75, innerWidth / window.innerHeight, 0.1,500);
                var renderer = new THREE.WebGLRenderer();
                renderer.setSize(window.innerWidth, window.innerHeight);
                document.body.appendChild(renderer.domElement);
@@ -38,74 +30,138 @@
 
 
 
+
         //Criar o plano
-        const planoGeometria = new THREE.PlaneGeometry(200,200);
-        const planoMaterial = new THREE.MeshBasicMaterial(
+        const planoGeometria = new THREE.PlaneGeometry(300,300);                        //Geometria do Plano
+        const planoMaterial = new THREE.MeshBasicMaterial(                              //Propriedades do plano
             {
-                color: 0x00435f,
+                color: 0x76605A,
                 side: THREE.FrontSide
             }
         )
-        const plano = new THREE.Mesh(planoGeometria, planoMaterial);
-        cena.add(plano);
+        const plano = new THREE.Mesh(planoGeometria, planoMaterial);                    //Cria o plano
+        plano.position.x=0;                                                             //posicionando o plano em posição inicial
+        plano.position.y=0;                                                             //de modo a começar junto dos eixos 
+        plano.name="Plano 2D";                                                          //Definir nome para o plano
+        cena.add(plano);                                                                //e adiciona na cena
 
         //Variaveis da Cena
-        let fatPixelSize = 10;                                          //Tamanho do Pixel "Gordo"
-        let centerRef = [10,10,10];                                     //Ponto de Referencial dos eixos
-        let limite = 100;
+        let fatPixelSize = 5;                                                           //Tamanho do Pixel "Gordo"
+        let centerRef = [-130,-130,0];                                                  //Ponto de Referencial dos eixos
+        let limite = 125;                                                               //Limite maximo dos eixos
 
         //Criar Eixos
-        const eixoMaterial = new THREE.LineBasicMaterial(               //Propriedades dos eixos
+        const eixoMaterial = new THREE.LineBasicMaterial(                               //Propriedades dos eixos
             {
-                color:0x65a74f
+                color:0xf53100
             }
         );
-        const eixoX = [];
-        const eixoY = [];
-        eixoX.push( new THREE.Vector3(centerRef[0], centerRef[1], centerRef[2]));
-        eixoX.push( new THREE.Vector3(limite, centerRef[1], centerRef[2]));
-        eixoY.push( new THREE.Vector3(centerRef[0], centerRef[1], centerRef[2]));
-        eixoY.push( new THREE.Vector3(centerRef[0], limite, centerRef[2]));
-        const eixoXGeometria = new THREE.BufferGeometry().setFromPoints(eixoX);
-        const eixoYGeometria = new THREE.BufferGeometry().setFromPoints(eixoY); 
-        const eixoVertical = new THREE.Line(eixoYGeometria, eixoMaterial);
-        const eixoHorizontal = new THREE.Line(eixoXGeometria, eixoMaterial);
-        cena.add(eixoHorizontal);
-        cena.add(eixoVertical);
+        const eixoPontos = [];                                                                  //Pontos dos eixos
+        eixoPontos.push( new THREE.Vector3(centerRef[0], limite, centerRef[2]));                //Cria Ponto Limite de Y
+        eixoPontos.push( new THREE.Vector3(centerRef[0], centerRef[1], centerRef[2]));          //Cria Ponto de Origem XY
+        eixoPontos.push( new THREE.Vector3(limite, centerRef[1], centerRef[2]));                //Cria Ponto Limite de X
+        const eixoGeometria = new THREE.BufferGeometry().setFromPoints(eixoPontos);             //Geometria dos Eixos
+        const eixos = new THREE.Line(eixoGeometria, eixoMaterial);                              //Cria Eixos 
+        cena.add(eixos);                                                                        //Adiciona na cena os eixos
 
         //Criar Grelha
-        const grelhaMaterial = new THREE.LineBasicMaterial(     //Propriedades das linhas da grelha
+        const grelhaMaterial = new THREE.LineBasicMaterial(                                     //Propriedades das linhas da grelha
             {
                 color: 0xf5be00
             }
-        )
-        let xGrelha = [];                                       //Posições X da grelha
-        let yGrelha = [];                                       //Posições Y da grelha
+        );
+        let posicoesGrelha = [];                                                                //Posições das linhas da grelha
         //Criar as posições das linhas de grelha
-        for(let i = centerRef[0] + fatPixelSize, e = centerRef[1] + fatPixelSize; i <= limite; i+fatPixelSize, e+fatPixelSize){
-            xGrelha.push(i);
-            yGrelha.push(i);
+        for(let i = centerRef[0] + fatPixelSize; i <= limite; i=i+fatPixelSize){
+            posicoesGrelha.push(i);                                                             //Gerar as diferentes posições para as linhas
         }
-        const grelha = [];                      //Pontos das linhas da grelha
-
+        //Gerar Linhas Verticais
+        for(let i = 0; i< posicoesGrelha.length; i++){
+            const grelha = [];                                                                  //Pontos das linhas da grelha
+            grelha.push(new THREE.Vector3(posicoesGrelha[i], centerRef[1], centerRef[2]));      //Criar ponto inicial 
+            grelha.push(new THREE.Vector3(posicoesGrelha[i], limite, centerRef[2]));            //Criar ponto final
+            const grelhaGeometria = new THREE.BufferGeometry().setFromPoints(grelha);           //Gerar geometria da linha
+            const grelhaPixel = new THREE.Line(grelhaGeometria, grelhaMaterial);                //Gerar Linha vertical
+            cena.add(grelhaPixel);                                                              //Adicionar linha na cena
+        }
+        //Gerar Linhas Horizontais
+        for(let i = 0; i< posicoesGrelha.length; i++){
+            const grelha = [];                                                                  //Pontos das linhas da grelha
+            grelha.push(new THREE.Vector3(centerRef[0], posicoesGrelha[i], centerRef[2]));      //Criar ponto inicial
+            grelha.push(new THREE.Vector3(limite, posicoesGrelha[i], centerRef[2]));            //Criar ponto final
+            const grelhaGeometria = new THREE.BufferGeometry().setFromPoints(grelha);           //Gerar geometria da linha
+            const grelhaPixel = new THREE.Line(grelhaGeometria, grelhaMaterial);                //Gerar linha horizontal
+            cena.add(grelhaPixel);                                                              //Adicionar linha na cena
+        }
 
         //Criar o ViewPort 2D
-
+        const cameraOrto2D = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 1, 200);
+	    cameraOrto2D.position.x = 0;                                                            //Posiciona a Camera no eixo x
+	    cameraOrto2D.position.y = 0;                                                            //Posiciona a Camera no eixo y
+	    cameraOrto2D.position.z = 50;                                                           //Posiciona a camera no eixo z
+	    cameraOrto2D.lookAt(cena.position);                                                     //Coloca camera a observar a possição da cena
+        cena.add(cameraOrto2D);                                                                 //Adiciona a camera na cena
+        renderer.render(cena,cameraOrto2D);                                                     //Atualiza a imagem da camera
+        
         //Criar o viewPort 3D
 
 
+        //Ler Coordenadas do Formulário
+        function desenhar(){
+            let texto = document.getElementById("coordenadas").value;                               //Ler Conteudo do formulário
+            let coord = texto.split(" ");                                                           //Dividir o texto em coordenadas
+            let x1 = Number(coord[0]);                                                              //Definir x1
+            let y1 = Number(coord[1]);                                                              //Definir y1
+            let x2 = Number(coord[2]);                                                              //Definir x2
+            let y2 = Number(coord[3]);                                                              //Definir y2
+            let pontos = lineMP([x1,y1],[x2,y2]);                                                   //Obter Pontos a desenhar            
+            //Desenhar os pontos gerados
+            for(let i = 0; i< pontos.length; i++){
+                let ponto = pontos[i];                                                              //Obter Array das Coordenadas no Array
+                let x = ponto[0];                                                                   //Definir X com o primeiro valor do Array de Coordenadas
+                let y = ponto[1];                                                                   //Definir Y com o segundo  valor no array de coordenadas
+                x = x*fatPixelSize;
+                y = y*fatPixelSize;
+                drawPixel(x,y);                                                                     //Desenhar o Pixel na cena
+                renderer.render(cena,cameraOrto2D);                                                 //Atualiza a Cena na camera
+            }
+        }
+
+        function drawPixel(x,y){
+            const geometriaPixel = new THREE.CubeGeometry(fatPixelSize, fatPixelSize, fatPixelSize);    //Definir Propriedades
+            const materialPixel = new THREE.MeshBasicMaterial(                                          //e geometria do cubo
+                {
+                    color: 0x2C5163
+                }
+            );
+            let pixel = new THREE.Mesh(geometriaPixel, materialPixel);                                  //Criar Cubo
+            pixel.position.x=x;                                                                         //Posiciona o cubo em x
+            pixel.position.y=y;                                                                         //Posiciona o cubo em y
+            pixel.position.z=10;                                                                        //Posiciona o cubo em z
+            pixel.name="Pixel";                                                                         //Define o nome "Pixel" para o cubo
+            cena.add(pixel);                                                                            //Adicionar Cubo na cena
+        }
+
+        //Apagar Cubos das Linhas
+        function apagar(){
+            let objeto;
+            do{
+                objeto = cena.getObjectByName("Pixel");                                                 //Pesquisa os elementos com o nome "Pixel"
+                if(objeto){                                                                             //Verifica se encontrou objeto
+                    cena.remove(objeto);                                                                //Remove objeto da cena
+                    objeto.material.dispose();                                                          //e elimina da memoria
+                }
+            }while(objeto);
+            renderer.render(cena,cameraOrto2D);
+        }
+        
+
+        //let pontos = lineMP([1,6],[8,4]);
+        //alert(pontos);
+        //console.table(pontos);
 
 
-        let pontos = lineMP([1,6],[8,4]);
-        alert(pontos);
-        console.table(pontos);
-
-
-        camera.position.z=100;
-               camera.position.x=10;
-               camera.position.y=5;
-               renderer.render(cena,camera);
-
+        renderer.render(cena,cameraOrto2D);
 
     </script>  
 </html>
