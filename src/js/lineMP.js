@@ -29,7 +29,7 @@ function lineMP(pontoA, pontoB){
     let incrementoE = 2 * dy;           //Incremento para escolha de E
     let d = 2 * dy - dx;                //Calcular valor inicial de d
     //Calcular Pontos
-    let y = y1;                  //Variavel auxiliar para ponto y
+    let y = y1;                         //Variavel auxiliar para ponto y
     for(let x = x1; x<= x2; x++){
         pontos.push([x,y]);             //Adicionar o ponto inicial ao array de pontos calculados
         //Calcular proximo valor de d

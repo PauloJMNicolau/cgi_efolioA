@@ -95,7 +95,7 @@
         }
 
         //Criar o ViewPort 2D
-        const cameraOrto2D = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 1, 200);
+        const cameraOrto2D = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 1, 2000);
 	    cameraOrto2D.position.x = 0;                                                            //Posiciona a Camera no eixo x
 	    cameraOrto2D.position.y = 0;                                                            //Posiciona a Camera no eixo y
 	    cameraOrto2D.position.z = 50;                                                           //Posiciona a camera no eixo z
@@ -114,19 +114,21 @@
             let y1 = Number(coord[1]);                                                              //Definir y1
             let x2 = Number(coord[2]);                                                              //Definir x2
             let y2 = Number(coord[3]);                                                              //Definir y2
-            let pontos = lineMP([x1,y1],[x2,y2]);                                                   //Obter Pontos a desenhar            
+            let pontos = lineMP([x1,y1],[x2,y2]);                                                   //Obter Pontos a desenhar  
+            console.table(pontos);          
             //Desenhar os pontos gerados
             for(let i = 0; i< pontos.length; i++){
                 let ponto = pontos[i];                                                              //Obter Array das Coordenadas no Array
                 let x = ponto[0];                                                                   //Definir X com o primeiro valor do Array de Coordenadas
                 let y = ponto[1];                                                                   //Definir Y com o segundo  valor no array de coordenadas
-                x = x*fatPixelSize;
-                y = y*fatPixelSize;
+                x = x*fatPixelSize+centerRef[0];
+                y = y*fatPixelSize+centerRef[1];
                 drawPixel(x,y);                                                                     //Desenhar o Pixel na cena
                 renderer.render(cena,cameraOrto2D);                                                 //Atualiza a Cena na camera
             }
         }
 
+        //Desenhar o Pixel nas posiçoes fornecidas
         function drawPixel(x,y){
             const geometriaPixel = new THREE.CubeGeometry(fatPixelSize, fatPixelSize, fatPixelSize);    //Definir Propriedades
             const materialPixel = new THREE.MeshBasicMaterial(                                          //e geometria do cubo
