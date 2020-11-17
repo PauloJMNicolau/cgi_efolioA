@@ -13,6 +13,7 @@
             <br />
             <button type="button" onclick="desenhar()" >Desenhar</button>
             <button type="button" onclick="apagar()">Apagar Retas</button>
+            <button type="button" onclick="mudarVista()" id="vista">3D</button>
     </body>
     <script type="text/javascript" src="js/three.js"></script>
     <script type="text/javascript" src="js/lineMP.js"></script>   
@@ -21,15 +22,17 @@
 
         //Criar a Cena
         const cena = new THREE.Scene();                                                 //Criar a cena
+        let camera;
 
+        //Render da Imagem
+        const renderer = new THREE.WebGLRenderer();                                     //Criar o Renderer
+        renderer.setSize(window.innerWidth, window.innerHeight);                        //Definir Tamanho do Renderer
+        document.body.appendChild(renderer.domElement);                                 //Adicionar na página HTML o elemento
 
-               var renderer = new THREE.WebGLRenderer();
-               renderer.setSize(window.innerWidth, window.innerHeight);
-               document.body.appendChild(renderer.domElement);
+        //Definições iniciais da cena
 
-
-
-
+        var light = new THREE.AmbientLight( 0x000033 ); // soft white light
+cena.add( light );
 
         //Criar o plano
         const planoGeometria = new THREE.PlaneGeometry(300,300);                        //Geometria do Plano
@@ -94,17 +97,50 @@
             cena.add(grelhaPixel);                                                              //Adicionar linha na cena
         }
 
-        //Criar o ViewPort 2D
-        const cameraOrto2D = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 1, 2000);
-	    cameraOrto2D.position.x = 0;                                                            //Posiciona a Camera no eixo x
-	    cameraOrto2D.position.y = 0;                                                            //Posiciona a Camera no eixo y
-	    cameraOrto2D.position.z = 50;                                                           //Posiciona a camera no eixo z
-	    cameraOrto2D.lookAt(cena.position);                                                     //Coloca camera a observar a possição da cena
-        cena.add(cameraOrto2D);                                                                 //Adiciona a camera na cena
-        renderer.render(cena,cameraOrto2D);                                                     //Atualiza a imagem da camera
-        
-        //Criar o viewPort 3D
+        function createViewport2D(){
+            //Criar o ViewPort 2D
+            camera = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 1, 2000);
+            camera.position.x = 0;                                                            //Posiciona a Camera no eixo x
+            camera.position.y = 0;                                                            //Posiciona a Camera no eixo y
+            camera.position.z = 50;                                                           //Posiciona a camera no eixo z
+            camera.lookAt(cena.position);                                                     //Coloca camera a observar a possição da cena
+            camera.name="2D";
+            cena.add(camera);                                                                 //Adiciona a camera na cena
+            renderer.render(cena,camera);                                                     //Atualiza a imagem da camera
+        }
 
+        function createViewport3D(){
+            //Criar o viewPort 3D
+            camera = new THREE.OrthographicCamera(window.innerWidth/ -6, window.innerWidth/6, window.innerHeight / 6, window.innerHeight / -6, 2, 2000);
+            camera.position.x = -20;                                                          //Posiciona a Camera no eixo x
+            camera.position.y = 15;                                                          //Posiciona a Camera no eixo y
+            camera.position.z = 70;                                                           //Posiciona a camera no eixo z
+            camera.lookAt(cena.position);                                                     //Coloca camera a observar a possição da cena
+            camera.name="3D";
+            cena.add(camera);                                                                 //Adiciona a camera na cena
+            renderer.render(cena,camera);                                                     //Atualiza a imagem da camera
+        }
+
+        function mudarVista(){
+            camera = cena.getObjectByName("2D");
+            console.log(camera);
+            if(camera){
+                //Remover Camera existente
+                cena.remove(camera);
+                createViewport3D();
+                let bt = document.getElementById("vista");
+                bt.innerHTML = "2D";
+            } else {
+                camera = cena.getObjectByName("3D");
+                if(camera){
+                    //Remover Camera 3D existente
+                    cena.remove(camera);
+                }
+                createViewport2D();
+                let bt = document.getElementById("vista");
+                bt.innerHTML = "3D";
+            }
+        }
 
         //Ler Coordenadas do Formulário
         function desenhar(){
@@ -124,7 +160,7 @@
                 x = x*fatPixelSize+centerRef[0];
                 y = y*fatPixelSize+centerRef[1];
                 drawPixel(x,y);                                                                     //Desenhar o Pixel na cena
-                renderer.render(cena,cameraOrto2D);                                                 //Atualiza a Cena na camera
+                renderer.render(cena,camera);                                                 //Atualiza a Cena na camera
             }
         }
 
@@ -136,12 +172,26 @@
                     color: 0x2C5163
                 }
             );
+            const wireGeoPixel = new THREE.CubeGeometry(fatPixelSize, fatPixelSize, fatPixelSize);    //Definir Propriedades
+            const wireframePixel = new THREE.MeshBasicMaterial(                                          //e geometria do cubo
+                {
+                    color: 0x000000,
+                    wireframe: true
+                    
+                }
+            );
             let pixel = new THREE.Mesh(geometriaPixel, materialPixel);                                  //Criar Cubo
+            let pixelBorda = new THREE.Mesh(wireGeoPixel, wireframePixel);
             pixel.position.x=x;                                                                         //Posiciona o cubo em x
             pixel.position.y=y;                                                                         //Posiciona o cubo em y
             pixel.position.z=10;                                                                        //Posiciona o cubo em z
             pixel.name="Pixel";                                                                         //Define o nome "Pixel" para o cubo
+            pixelBorda.position.x=x;                                                                         //Posiciona o cubo em x
+            pixelBorda.position.y=y;                                                                         //Posiciona o cubo em y
+            pixelBorda.position.z=10;                                                                        //Posiciona o cubo em z
+            pixelBorda.name="Pixel"; 
             cena.add(pixel);                                                                            //Adicionar Cubo na cena
+            cena.add(pixelBorda);
         }
 
         //Apagar Cubos das Linhas
@@ -154,16 +204,25 @@
                     objeto.material.dispose();                                                          //e elimina da memoria
                 }
             }while(objeto);
-            renderer.render(cena,cameraOrto2D);
+            renderer.render(cena,camera);
         }
         
 
         //let pontos = lineMP([1,6],[8,4]);
         //alert(pontos);
         //console.table(pontos);
+        createViewport2D();
 
+        document.addEventListener("keydown", teclaPresionada, false);
 
-        renderer.render(cena,cameraOrto2D);
+        function teclaPresionada(event){
+            let key = event.which;
+            if (key = 77){
+                mudarVista();
+            }
+        }
+
+        renderer.render(cena,camera);
 
     </script>  
 </html>
