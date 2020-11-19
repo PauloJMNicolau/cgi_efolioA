@@ -27,9 +27,9 @@
         let cena= {};                                                       //Variavel para a cena
         let camera;                                                         //Variavel para a camera
         let renderer = {};                                                  //Variavel para o Renderer
-        let planoSize = 301;                                                //Tamanho do Plano
-        let rato = {x:0, y:0, z:1};                                     
-        
+        let planoSize = 301;                                                //Tamanho do Plano                                     
+        let light = {}                                                      //Luz para se perceber a diferença de faces no 3D
+        let rato = {x:0, y:0, z:1};
 
         //Criar a Cena
         function createScene(){
@@ -45,7 +45,7 @@
             const planoGeometria = new THREE.PlaneGeometry(planoSize,planoSize);            //Geometria do Plano
             const planoMaterial = new THREE.MeshBasicMaterial(                              //Propriedades do plano
                 {
-                    color: 0x76605A,
+                    color: 0xA8B5FF,
                     side: THREE.FrontSide
                 }
             )
@@ -65,10 +65,10 @@
             );
             const eixoPontosX = [];                                                                                     //Pontos dos eixos
             const eixoPontosY = [];                                                                                     //x e y
-            eixoPontosY.push( new THREE.Vector3(centerRef[0], centerRef[1]+limite, centerRef[2]+2*fatPixelSize+1));     //Cria Ponto Limite superior de Y
-            eixoPontosY.push( new THREE.Vector3(centerRef[0], centerRef[1]-limite, centerRef[2]+2*fatPixelSize+1));     //cria ponto limite inferior de Y
-            eixoPontosX.push( new THREE.Vector3(centerRef[0]-limite, centerRef[1], centerRef[2]+2*fatPixelSize+1));     //Cria Ponto Limite Inferior de X
-            eixoPontosX.push( new THREE.Vector3(centerRef[0]+limite, centerRef[1], centerRef[2]+2*fatPixelSize+1));     //Cria Ponto Limite Superior de X
+            eixoPontosY.push( new THREE.Vector3(centerRef[0], centerRef[1]+limite+5, centerRef[2]+2*fatPixelSize+1));   //Cria Ponto Limite superior de Y
+            eixoPontosY.push( new THREE.Vector3(centerRef[0], centerRef[1]-limite-5, centerRef[2]+2*fatPixelSize+1));   //cria ponto limite inferior de Y
+            eixoPontosX.push( new THREE.Vector3(centerRef[0]-limite-5, centerRef[1], centerRef[2]+2*fatPixelSize+1));   //Cria Ponto Limite Inferior de X
+            eixoPontosX.push( new THREE.Vector3(centerRef[0]+limite+5, centerRef[1], centerRef[2]+2*fatPixelSize+1));   //Cria Ponto Limite Superior de X
             const eixoGeometriaX = new THREE.BufferGeometry().setFromPoints(eixoPontosX);                               //Geometria dos Eixos
             const eixoGeometriaY = new THREE.BufferGeometry().setFromPoints(eixoPontosY);                               //Geometria dos Eixos
             const eixoX = new THREE.Line(eixoGeometriaX, eixoMaterial);                                                 //Cria Eixos 
@@ -81,7 +81,7 @@
         function createGrid(){
             const grelhaMaterial = new THREE.LineBasicMaterial(                                                         //Propriedades das linhas da grelha
                 {
-                    color: 0xf5be00
+                    color: 0x001068
                 }
             );
             let posicoesGrelha = [];                                                                                    //Posições das linhas da grelha
@@ -135,6 +135,10 @@
             camera.lookAt(cena.position);                                                       //Coloca camera a observar a possição da cena
             camera.name="2D";                                                                   //Atribuir o nome 3D na camera
             cena.add(camera);                                                                   //Adiciona a camera na cena
+            // Luz para 2D
+            light = new THREE.AmbientLight(0xffffff);                                           //Iliminação para se conseguir ver a cor do material
+            light.name = "Luz";                                                                 //Atribuir o nome à iluminação
+            cena.add(light);                                                                    //Adicionar na cena
             renderer.render(cena,camera);                                                       //Atualiza a imagem da camera
         }
 
@@ -148,11 +152,18 @@
             camera.lookAt(cena.position);                                                       //Coloca camera a observar a possição da cena
             camera.name="3D";                                                                   //Atribuir o nome 3D na camera
             cena.add(camera);                                                                   //Adiciona a camera na cena
+            // Luz para 3D
+            light = new THREE.HemisphereLight(0xffffff, 0xB12AA0, 1);                           //Iluminação para se conseguir perceber os cubos
+            light.name = "Luz";                                                                 //Atribuir o nome à iluminação
+            cena.add(light);                                                                    //Adicionar na cena
             renderer.render(cena,camera);                                                       //Atualiza a imagem da camera
         }
 
         //Função para mudar a vista da câmara
         function mudarVista(){
+            light = cena.getObjectByName("Luz");                                            //Procura por existencia de objtos com o nome "Luz"
+            if(light)
+                cena.remove(light);                                                         //Remove da cena caso existam
             camera = cena.getObjectByName("2D");                                            //Procura por existencia de Vistas 2D
             if(camera){                                                                     //Se existir vista
                 cena.remove(camera);                                                        //Remover Camera 2D existente
@@ -177,7 +188,7 @@
             let y1 = Number(coord[1]);                                             //Definir y1
             let x2 = Number(coord[2]);                                             //Definir x2
             let y2 = Number(coord[3]);                                             //Definir y2
-            let pontos = lineMP([x1,y1],[x2,y2]);                                  //Obter Pontos a desenhar         
+            let pontos = lineMP([x1,y1],[x2,y2]);                                  //Obter Pontos a desenhar       
             //Desenhar os pontos gerados
             for(let i = 0; i< pontos.length; i++){
                 let ponto = pontos[i];                                             //Obter Array das Coordenadas no Array
@@ -193,7 +204,7 @@
         //Desenhar o Pixel nas posiçoes fornecidas
         function drawPixel(x,y){
             const geometriaPixel = new THREE.CubeGeometry(fatPixelSize-1, fatPixelSize-1, fatPixelSize-1);  //Definir Propriedades
-            const materialPixel = new THREE.MeshBasicMaterial(                                              //e geometria do cubo
+            const materialPixel = new THREE.MeshLambertMaterial(                                              //e geometria do cubo
                 {
                     color: 0x2C5163
                 }
@@ -223,12 +234,21 @@
         document.addEventListener("keydown", teclaPresionada, false);                                       //Verifica se tecla foi presionada
         function teclaPresionada(event){
             let key = event.which;
-            if (key == 77){                                                                                 //Verifica Tecla "M"
-                mudarVista();                                                                               //Altera para a vista alternativa
+            switch (key){
+                case 77:                                                                                    //Verifica Tecla "M"
+                    mudarVista();                                                                           //Altera para a vista alternativa
+                    break;
+                case 68:                                                                                    //Verifica Tecla "D"
+                case 13:                                                                                    //Verifica Tecla "Enter"
+                    desenhar();                                                                             //Lê caixa de texto e desenha pontos
+                    break;
+                case 8:                                                                                     //Verifica Tecla "Backspace"
+                case 46:                                                                                    //Verifica Tecla "Delete"
+                case 67:                                                                                    //Verifica Tecla "C"
+                    apagar();                                                                               //Apaga Linhas
+                    break;
             }
         }
-
-        
 
         //Definições iniciais da cena
         function init(){
