@@ -30,9 +30,8 @@
         let renderer = {};                                                  //Variavel para o Renderer
         let planoSize = 301;                                                //Tamanho do Plano                                     
         let light = {}                                                      //Luz para se perceber a diferença de faces no 3D
-        let mesh;
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
+        const raycaster = new THREE.Raycaster();                            //Variavel para area clicavel
+        const mouse = new THREE.Vector2();                                  //Variavel para as coordenadas do rato
 
         //Criar a Cena
         function createScene(){
@@ -61,86 +60,86 @@
 
         //Gerar Linhas Verticais
         function createPointGrid(){
-            const planoGeometriaGrelha = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);
+            const planoGeometriaGrelha = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);       //Propriedades e geometria do objeto
             const planoMaterialGrelha = new THREE.MeshBasicMaterial(
                 {
                     color: 0xA8B5FF,
                     side: THREE.FrontSide
                 }
             );
-            const planoGrelha = new THREE.Mesh(planoGeometriaGrelha, planoMaterialGrelha);
-            planoGrelha.position.x=centerRef[0];
+            const planoGrelha = new THREE.Mesh(planoGeometriaGrelha, planoMaterialGrelha);              //Criar o ponto de origem que será clicavel
+            planoGrelha.position.x=centerRef[0];                                                        //Posições do ponto de origem
             planoGrelha.position.y=centerRef[1];
             planoGrelha.position.z=centerRef[2]+1;
-            planoGrelha.name="0 0";
-            cena.add(planoGrelha);
-            for(let x = fatPixelSize; x <= limite; x = x+fatPixelSize){
-                desenharEixoPontos(x);
-                desenharEixoPontos(-x);  
-                for(let y = fatPixelSize; y <= limite; y = y+fatPixelSize){
-                    desenharLinhaPontos(x,y);
-                    desenharLinhaPontos(-x,-y);
+            planoGrelha.name="0 0";                                                                     //Nome do ponto de origem
+            cena.add(planoGrelha);                                                                      //Adiciona objeto na cena
+            for(let x = fatPixelSize; x <= limite; x = x+fatPixelSize){                                 //Cria os restantes pontos clicaveis
+                desenharEixoPontos(x);                                                                  //Desenha os pontos dos eixos com valores positivos
+                desenharEixoPontos(-x);                                                                 //Desenha os pontos dos eixos com valores negativos
+                for(let y = fatPixelSize; y <= limite; y = y+fatPixelSize){                             //Desenha os restantes pontos nos quadrantes
+                    desenharLinhaPontos(x,y);                                                           //Desenha pontos nos quadrantes com coordenada x positiva
+                    desenharLinhaPontos(-x,-y);                                                         //Desenha pontos nos quadrantes com coordenada x negativa
                 }
             }
         }
 
         function desenharEixoPontos(x){
-            const planoGeometriaGrelha = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);
+            const planoGeometriaGrelha = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);       //Propriedades e geometria dos pontos clicaveis
             const planoMaterialGrelha = new THREE.MeshBasicMaterial(
                 {
                     color: 0xA8B5FF,
                     side: THREE.FrontSide
                 }
             );
-            const planoGrelha = new THREE.Mesh(planoGeometriaGrelha, planoMaterialGrelha);
-            planoGrelha.position.x=centerRef[0]+x;
+            const planoGrelha = new THREE.Mesh(planoGeometriaGrelha, planoMaterialGrelha);              //Cria o ponto que será clicavel
+            planoGrelha.position.x=centerRef[0]+x;                                                      //Posições do ponto clicavel
             planoGrelha.position.y=centerRef[1];
             planoGrelha.position.z=centerRef[2]+1;
-            planoGrelha.name=x /fatPixelSize + " 0";
-            cena.add(planoGrelha);
-            const planoGeometriaGrelha2 = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);
+            planoGrelha.name=x /fatPixelSize + " 0";                                                    //Atribui o nome ao ponto com as coordenadas
+            cena.add(planoGrelha);                                                                      //Adiciona ponto na cena
+            const planoGeometriaGrelha2 = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);      //Propriedades e geometria dos pontos clicaveis
             const planoMaterialGrelha2 = new THREE.MeshBasicMaterial(
                 {
                     color: 0xA8B5FF,
                     side: THREE.FrontSide
                 }
             );
-            const plano1Grelha = new THREE.Mesh(planoGeometriaGrelha2, planoMaterialGrelha2);
-            plano1Grelha.position.x=centerRef[0];
+            const plano1Grelha = new THREE.Mesh(planoGeometriaGrelha2, planoMaterialGrelha2);           //Cria o ponto que será clicavel
+            plano1Grelha.position.x=centerRef[0];                                                       //Posições do ponto clicavel
             plano1Grelha.position.y=centerRef[1]+x;
             plano1Grelha.position.z=centerRef[2]+1;
-            plano1Grelha.name= "0 "+ (x/fatPixelSize);
-            cena.add(plano1Grelha);
+            plano1Grelha.name= "0 "+ (x/fatPixelSize);                                                  //Atribui o nome ao ponto com as coordenadas
+            cena.add(plano1Grelha);                                                                     //Adiciona ponto na cena
         }
 
         //Gerar Linhas Horizontais
         function desenharLinhaPontos(x,y){
-            const planoGeometriaGrelha = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);
+            const planoGeometriaGrelha = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);       //Propriedades e geometria dos pontos clicaveis
             const planoMaterialGrelha = new THREE.MeshBasicMaterial(
                 {
-                    color: 0xA8B5FF,
+                    color: 0xA8B5Ff,
                     side: THREE.FrontSide
                 }
             );
-            const planoGrelha = new THREE.Mesh(planoGeometriaGrelha, planoMaterialGrelha);
-            planoGrelha.position.x=centerRef[0]+x;
+            const planoGrelha = new THREE.Mesh(planoGeometriaGrelha, planoMaterialGrelha);              //Criar ponto clicavel
+            planoGrelha.position.x=centerRef[0]+x;                                                      //Posições do ponto clicavel
             planoGrelha.position.y=centerRef[1]+y;
             planoGrelha.position.z=centerRef[2]+1;
-            planoGrelha.name= x /fatPixelSize + " "+ y/fatPixelSize;
-            cena.add(planoGrelha);
-            const planoGeometriaGrelha2 = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);
-            const planoMaterialGrelha2 = new THREE.MeshBasicMaterial(
+            planoGrelha.name= x /fatPixelSize + " "+ y/fatPixelSize;                                    //Adiciona no nome do objeto as coordenadas do ponto
+            cena.add(planoGrelha);                                                                      //Adiciona ponto na cena
+            const planoGeometriaGrelha2 = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);      //Propriedades e geometria dos pontos clicaveis
+            const planoMaterialGrelha2 = new THREE.MeshBasicMaterial(       
                 {
-                    color: 0xA8B5FF,
+                    color: 0xA8B5Ff,
                     side: THREE.FrontSide
                 }
             );
-            const plano1Grelha = new THREE.Mesh(planoGeometriaGrelha2, planoMaterialGrelha2);
-            plano1Grelha.position.x=centerRef[0]+x;
+            const plano1Grelha = new THREE.Mesh(planoGeometriaGrelha2, planoMaterialGrelha2);           //Cria ponto clicavel
+            plano1Grelha.position.x=centerRef[0]+x;                                                     //Posições do ponto clicavel
             plano1Grelha.position.y=centerRef[1]-y;
             plano1Grelha.position.z=centerRef[2]+1;
-            plano1Grelha.name=x /fatPixelSize + " "+ (-y/fatPixelSize);
-            cena.add(plano1Grelha);
+            plano1Grelha.name=x /fatPixelSize + " "+ (-y/fatPixelSize);                                 //Adiciona no nome do objeto as coordenadas do ponto
+            cena.add(plano1Grelha);                                                                     //Adiciona ponto na cena
         }
 
         //Criar Eixos
@@ -273,16 +272,17 @@
             }
         }
 
+        //Fazer reset aos pontos clicados
         function limparSelecao(){
-            let texto = document.getElementById("coordenadas").value;
-            let coord = texto.split(" ");
-            let p1 = "".concat(coord[0]).concat(" ").concat(coord[1]);
-            let p2 = "".concat(coord[2]).concat(" ").concat(coord[3]);
-            let obj = cena.getObjectByName(p1);
-            obj.material.color.set(0xA8B5FF);
+            let texto = document.getElementById("coordenadas").value;                       //Obter valores na caixa de texto
+            let coord = texto.split(" ");                                                   //para obter objetos a fazer reset
+            let p1 = "".concat(coord[0]).concat(" ").concat(coord[1]);                      //Formar nome do primeiro ponto
+            let p2 = "".concat(coord[2]).concat(" ").concat(coord[3]);                      //Formar nome do segundo ponto
+            let obj = cena.getObjectByName(p1);                                             //Obter objetos a fazer reset
             let obj2 = cena.getObjectByName(p2);
+            obj.material.color.set(0xA8B5FF);                                               //Definir cor original dos pontos clicados anteriormente
             obj2.material.color.set(0xA8B5FF);
-            document.getElementById("coordenadas").value="";
+            document.getElementById("coordenadas").value="";                                //Apagar caixa de texto
         }
 
         //Ler Coordenadas do Formulário
@@ -304,7 +304,7 @@
                 drawPixel(x,y);                                                    //Desenhar o Pixel na cena
                 renderer.render(cena,camera);                                      //Atualiza a Cena na camera
             }
-            limparSelecao();
+            limparSelecao();                                                       //Colocar os pontos clicados ao estado Original
         }
 
         //Desenhar o Pixel nas posiçoes fornecidas
@@ -355,61 +355,57 @@
             }
         }
 
+        //Função para aceitar os eventos do rato para desenhar
+        window.addEventListener( 'mousedown', onMouseDown, false );
+        function onMouseDown( event ) {
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;                                        //Obter coordenada x clicada com o rato
+            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;                                     //Obter coordenada y clicada com o rato
+            obterPontoClicado();                                                                            //Processar evento do rato
+        }
+
+        //Obter as posições do ecrã clicadas pelo rato
+        function obterPontoClicado() {
+            raycaster.setFromCamera( mouse, camera );                                                           //Definir área de visualização clicavel
+            const intersects = raycaster.intersectObjects( cena.children );                                     //Obter objetos clicados com o rato
+            for(let i= intersects.length-1; i >=0; i--){                                                        //Percorrer o array de objetos clicados removendo
+                let obj = intersects[i];                                                                        //removendo os objetos desnecessários
+                if(obj.object.name === "Plano" || obj.object.name === "Eixo X" || obj.object.name === "Eixo Y"  //para os eventos 
+                    || obj.object.name === "Grelha" || obj.object.name === "Pixel"){
+                    intersects.splice(i,1);                                                                     //Remover objeto
+                }
+            }
+            if(intersects[0]){                                                                                  //Se existirem objetos clicados
+                let coord = intersects[0].object.name;                                                          //Obter o nome do objeto
+                intersects[0].object.material.color.set(0x514093);                                              //Definir uma cor diferente para sinalizar a posição clicada
+                verivicarCaixaTexto(coord);                                                                     //Atualizar caixa de texto com o nome do objeto
+            }
+            renderer.render( cena, camera );                                                                    //Atualizar cena
+        }
+
+        //Atualizar caixa de texto do ecrã
+        function verivicarCaixaTexto(coord){
+            let texto = document.getElementById("coordenadas").value;                                           //Obter valor na caixa de texto
+            let res = texto.split(" ");                                                                         //e separar as coordenadas
+            if(res.length === 2){                                                                               //Se tamanho das coordenas for de 2 valores
+                texto = texto.concat(" ").concat(coord);                                                        //Adiciona na caixa de texto
+                document.getElementById("coordenadas").value = texto;                                           //o valor de coordenadas recebido 
+                desenhar();                                                                                     //Desenha a linha
+            } else{
+                document.getElementById("coordenadas").value = coord;                                           //Se for diferente de 2 coloca valor de coordenadas recebido na caixa de texto
+            }
+        }
+
         //Definições iniciais da cena
         function init(){
             createScene();                                                                                  //Criar Cena e Renderer
             createPlane();                                                                                  //Criar Plano
-            createPointGrid()
+            createPointGrid();                                                                              //Cria os pontos clicaveis
             createEixos();                                                                                  //Criar Eixos
             createGrid();                                                                                   //Criar Grelha do plano
             createViewport2D();                                                                             //Inicia programa com vista 2D
         }
 
         init();
-
-
-        window.addEventListener( 'mousedown', onMouseDown, false );
-        function onMouseDown( event ) {
-            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-            render();
-        }
-
-        function render() {
-
-            // update the picking ray with the camera and mouse position
-            raycaster.setFromCamera( mouse, camera );
-
-            // calculate objects intersecting the picking ray
-            const intersects = raycaster.intersectObjects( cena.children );
-            
-            for(let i= intersects.length-1; i >=0; i--){
-                let obj = intersects[i];
-                if(obj.object.name === "Plano" || obj.object.name === "Eixo X" || obj.object.name === "Eixo Y" 
-                    || obj.object.name === "Grelha" || obj.object.name === "Pixel"){
-                    intersects.splice(i,1);
-                }
-            }
-            if(intersects[0]){
-                let coord = intersects[0].object.name;
-                intersects[0].object.material.color.set(0x514093);
-                verivicarCaixaTexto(coord);
-            }
-            renderer.render( cena, camera );
-
-        }
-
-        function verivicarCaixaTexto(coord){
-            let texto = document.getElementById("coordenadas").value;
-            let res = texto.split(" ");
-            if(res.length === 2){
-                texto = texto.concat(" ").concat(coord);
-                document.getElementById("coordenadas").value = texto;
-                desenhar();  
-            } else{
-                document.getElementById("coordenadas").value = coord;
-            }
-        }
 
 
     </script>  
