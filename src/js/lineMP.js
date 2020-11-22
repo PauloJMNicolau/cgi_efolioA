@@ -20,7 +20,7 @@ function lineMP(pontoA, pontoB){
         declive = true;                         //Se for atualiza o valor de declive
         let aux = x1;                           //e troca a ordem das coordenadas (x,y) para (y,x)
         x1 = y1;                                //de ambos os pontos
-        x1 = aux;
+        y1 = aux;
         aux = x2;
         x2 = y2;
         y2 = aux;

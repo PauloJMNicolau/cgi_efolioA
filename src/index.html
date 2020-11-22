@@ -23,7 +23,7 @@
 
         //Variaveis da Cena
         let fatPixelSize = 6;                                               //Tamanho do Pixel "Gordo"
-        let centerRef = [10,0,0];                                            //Ponto de Referencial dos eixos
+        let centerRef = [0,0,0];                                            //Ponto de Referencial dos eixos
         let limite = 21*fatPixelSize;                                       //Limite maximo dos eixos
         let cena= {};                                                       //Variavel para a cena
         let camera;                                                         //Variavel para a camera
@@ -31,6 +31,8 @@
         let planoSize = 301;                                                //Tamanho do Plano                                     
         let light = {}                                                      //Luz para se perceber a diferença de faces no 3D
         let mesh;
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
 
         //Criar a Cena
         function createScene(){
@@ -57,12 +59,12 @@
             cena.add(plano);                                                                //e adiciona na cena
         }
 
-/*
-        function createPoint(){
+        //Gerar Linhas Verticais
+        function createPointGrid(){
             const planoGeometriaGrelha = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);
             const planoMaterialGrelha = new THREE.MeshBasicMaterial(
                 {
-                    color: 0x00B5FF,
+                    color: 0xA8B5FF,
                     side: THREE.FrontSide
                 }
             );
@@ -73,67 +75,73 @@
             planoGrelha.name="0 0";
             cena.add(planoGrelha);
             for(let x = fatPixelSize; x <= limite; x = x+fatPixelSize){
-                desenharPlanoRatoX(x,x);
+                desenharEixoPontos(x);
+                desenharEixoPontos(-x);  
+                for(let y = fatPixelSize; y <= limite; y = y+fatPixelSize){
+                    desenharLinhaPontos(x,y);
+                    desenharLinhaPontos(-x,-y);
+                }
             }
         }
-        
-        function desenharPlanoRatoX(x,y){
-            desenharDiagonalPlanoRato(x,y);
-            desenharDiagonalPlanoRato(-x,-y);
-            for (let i = fatPixelSize; i < x; i = i+fatPixelSize ){
-                desenharPlanoRatoY(x,i);
-                desenharPlanoRatoY(x,-i);
-                desenharPlanoRatoY(-x,i);
-                desenharPlanoRatoY(-x,-i);
-            }
-        }
-        function desenharRetasPlano
 
-        function desenharDiagonalPlanoRato(x,y){
+        function desenharEixoPontos(x){
             const planoGeometriaGrelha = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);
             const planoMaterialGrelha = new THREE.MeshBasicMaterial(
                 {
-                    color: 0x00B5FF,
+                    color: 0xA8B5FF,
                     side: THREE.FrontSide
                 }
             );
-            let p1Grelha = new THREE.Mesh(planoGeometriaGrelha, planoMaterialGrelha);
-            p1Grelha.position.x=centerRef[0]+x;
-            p1Grelha.position.y=centerRef[1]+y;
-            p1Grelha.position.z=centerRef[2]+1;
-            p1Grelha.name= x /fatPixelSize + " "+ y/fatPixelSize;
-            cena.add(p1Grelha);
-            let p2Grelha = new THREE.Mesh(planoGeometriaGrelha, planoMaterialGrelha);
-            p2Grelha.position.x=centerRef[0]+x;
-            p2Grelha.position.y=centerRef[1]-y;
-            p2Grelha.position.z=centerRef[2]+1;
-            p2Grelha.name= x /fatPixelSize + " "+ (-y/fatPixelSize);
-            cena.add(p2Grelha);
+            const planoGrelha = new THREE.Mesh(planoGeometriaGrelha, planoMaterialGrelha);
+            planoGrelha.position.x=centerRef[0]+x;
+            planoGrelha.position.y=centerRef[1];
+            planoGrelha.position.z=centerRef[2]+1;
+            planoGrelha.name=x /fatPixelSize + " 0";
+            cena.add(planoGrelha);
+            const planoGeometriaGrelha2 = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);
+            const planoMaterialGrelha2 = new THREE.MeshBasicMaterial(
+                {
+                    color: 0xA8B5FF,
+                    side: THREE.FrontSide
+                }
+            );
+            const plano1Grelha = new THREE.Mesh(planoGeometriaGrelha2, planoMaterialGrelha2);
+            plano1Grelha.position.x=centerRef[0];
+            plano1Grelha.position.y=centerRef[1]+x;
+            plano1Grelha.position.z=centerRef[2]+1;
+            plano1Grelha.name= "0 "+ (x/fatPixelSize);
+            cena.add(plano1Grelha);
         }
-    
 
-        function desenharPlanoRatoY(x,i){
+        //Gerar Linhas Horizontais
+        function desenharLinhaPontos(x,y){
             const planoGeometriaGrelha = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);
             const planoMaterialGrelha = new THREE.MeshBasicMaterial(
                 {
-                    color: 0x00B5FF,
+                    color: 0xA8B5FF,
                     side: THREE.FrontSide
                 }
             );
-            
-            let p1Grelha = new THREE.Mesh(planoGeometriaGrelha, planoMaterialGrelha);
-            p1Grelha.position.x=centerRef[0]+x;
-            p1Grelha.position.y=centerRef[1]+i;
-            p1Grelha.position.z=centerRef[2]+1;
-            p1Grelha.name= x /fatPixelSize + " "+ i/fatPixelSize;
-            cena.add(p1Grelha);
-            let p2Grelha = new THREE.Mesh(planoGeometriaGrelha, planoMaterialGrelha);
-            p2Grelha.position.x=centerRef[0]+i;
-            p2Grelha.position.y=centerRef[1]+x;
-            p2Grelha.position.z=centerRef[2]+1;
-            p2Grelha.name= i/fatPixelSize + " "+ x/fatPixelSize;
-            cena.add(p2Grelha);
-        }/*
+            const planoGrelha = new THREE.Mesh(planoGeometriaGrelha, planoMaterialGrelha);
+            planoGrelha.position.x=centerRef[0]+x;
+            planoGrelha.position.y=centerRef[1]+y;
+            planoGrelha.position.z=centerRef[2]+1;
+            planoGrelha.name= x /fatPixelSize + " "+ y/fatPixelSize;
+            cena.add(planoGrelha);
+            const planoGeometriaGrelha2 = new THREE.PlaneGeometry(fatPixelSize-1, fatPixelSize-1);
+            const planoMaterialGrelha2 = new THREE.MeshBasicMaterial(
+                {
+                    color: 0xA8B5FF,
+                    side: THREE.FrontSide
+                }
+            );
+            const plano1Grelha = new THREE.Mesh(planoGeometriaGrelha2, planoMaterialGrelha2);
+            plano1Grelha.position.x=centerRef[0]+x;
+            plano1Grelha.position.y=centerRef[1]-y;
+            plano1Grelha.position.z=centerRef[2]+1;
+            plano1Grelha.name=x /fatPixelSize + " "+ (-y/fatPixelSize);
+            cena.add(plano1Grelha);
+        }
 
         //Criar Eixos
         function createEixos(){
@@ -227,14 +235,19 @@
             //Criar o viewPort 3D
             camera = new THREE.OrthographicCamera(window.innerWidth/ -6, window.innerWidth/6, window.innerHeight / 6, window.innerHeight / -6, 2, 2000);
             camera.position.x = -20;                                                            //Posiciona a Camera no eixo x
-            camera.position.y = 15;                                                             //Posiciona a Camera no eixo y
-            camera.position.z = 70;                                                             //Posiciona a camera no eixo z
+            camera.position.y = 25;                                                             //Posiciona a Camera no eixo y
+            camera.position.z = 80;                                                             //Posiciona a camera no eixo z
             camera.lookAt(cena.position);                                                       //Coloca camera a observar a possição da cena
             camera.name="3D";                                                                   //Atribuir o nome 3D na camera
             cena.add(camera);                                                                   //Adiciona a camera na cena
             // Luz para 3D
-            light = new THREE.HemisphereLight(0xffffff, 0xB12AA0, 1);                           //Iluminação para se conseguir perceber os cubos
+            const light = new THREE.DirectionalLight( 0xffffff, 0.8 );                          //Iluminação para se conseguir perceber os cubos
             light.name = "Luz";                                                                 //Atribuir o nome à iluminação
+            light.position.x = 20;                                                              //Posições da iliminação
+            light.position.y= 30;
+            light.position.z= 100;
+            //light = new THREE.HemisphereLight(0xffffff, 0xE2E2E2, 0.8);                         //Iluminação para se conseguir perceber os cubos
+            //light.name = "Luz";                                                                 //Atribuir o nome à iluminação
             cena.add(light);                                                                    //Adicionar na cena
             renderer.render(cena,camera);                                                       //Atualiza a imagem da camera
         }
@@ -260,6 +273,18 @@
             }
         }
 
+        function limparSelecao(){
+            let texto = document.getElementById("coordenadas").value;
+            let coord = texto.split(" ");
+            let p1 = "".concat(coord[0]).concat(" ").concat(coord[1]);
+            let p2 = "".concat(coord[2]).concat(" ").concat(coord[3]);
+            let obj = cena.getObjectByName(p1);
+            obj.material.color.set(0xA8B5FF);
+            let obj2 = cena.getObjectByName(p2);
+            obj2.material.color.set(0xA8B5FF);
+            document.getElementById("coordenadas").value="";
+        }
+
         //Ler Coordenadas do Formulário
         function desenhar(){
             let texto = document.getElementById("coordenadas").value;              //Ler Conteudo do formulário
@@ -279,14 +304,15 @@
                 drawPixel(x,y);                                                    //Desenhar o Pixel na cena
                 renderer.render(cena,camera);                                      //Atualiza a Cena na camera
             }
+            limparSelecao();
         }
 
         //Desenhar o Pixel nas posiçoes fornecidas
         function drawPixel(x,y){
             const geometriaPixel = new THREE.CubeGeometry(fatPixelSize-1, fatPixelSize-1, fatPixelSize-1);  //Definir Propriedades
-            const materialPixel = new THREE.MeshLambertMaterial(                                              //e geometria do cubo
+            const materialPixel = new THREE.MeshLambertMaterial(                                            //e geometria do cubo
                 {
-                    color: 0x2C5163
+                    color: 0x042EA1
                 }
             );
             let pixel = new THREE.Mesh(geometriaPixel, materialPixel);                                      //Criar Cubo
@@ -333,7 +359,7 @@
         function init(){
             createScene();                                                                                  //Criar Cena e Renderer
             createPlane();                                                                                  //Criar Plano
-         createPoint();
+            createPointGrid()
             createEixos();                                                                                  //Criar Eixos
             createGrid();                                                                                   //Criar Grelha do plano
             createViewport2D();                                                                             //Inicia programa com vista 2D
@@ -341,44 +367,50 @@
 
         init();
 
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
 
-function onMouseMove( event ) {
-
-	// calculate mouse position in normalized device coordinates
-	// (-1 to +1) for both components
-    event.preventDefault();
-	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-    render();
-}
-
-function render() {
-
-	// update the picking ray with the camera and mouse position
-	raycaster.setFromCamera( mouse, camera );
-
-	// calculate objects intersecting the picking ray
-    const intersects = raycaster.intersectObjects( cena.children );
-    for(let i= intersects.length-1; i >=0; i--){
-        let obj = intersects[i];
-        if(obj.object.name === "Plano" || obj.object.name === "Eixo X" || obj.object.name === "Eixo Y" || obj.object.name === "Grelha"){
-            intersects.splice(i,1);
+        window.addEventListener( 'mousedown', onMouseDown, false );
+        function onMouseDown( event ) {
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+            render();
         }
-    }
 
-	raycaster.setFromCamera( mouse, camera );
+        function render() {
 
-    console.log(intersects);
-    console.log(mouse);
+            // update the picking ray with the camera and mouse position
+            raycaster.setFromCamera( mouse, camera );
 
-	renderer.render( cena, camera );
+            // calculate objects intersecting the picking ray
+            const intersects = raycaster.intersectObjects( cena.children );
+            
+            for(let i= intersects.length-1; i >=0; i--){
+                let obj = intersects[i];
+                if(obj.object.name === "Plano" || obj.object.name === "Eixo X" || obj.object.name === "Eixo Y" 
+                    || obj.object.name === "Grelha" || obj.object.name === "Pixel"){
+                    intersects.splice(i,1);
+                }
+            }
+            if(intersects[0]){
+                let coord = intersects[0].object.name;
+                intersects[0].object.material.color.set(0x514093);
+                verivicarCaixaTexto(coord);
+            }
+            renderer.render( cena, camera );
 
-}
+        }
 
-window.addEventListener( 'mousedown', onMouseMove, false );
+        function verivicarCaixaTexto(coord){
+            let texto = document.getElementById("coordenadas").value;
+            let res = texto.split(" ");
+            if(res.length === 2){
+                texto = texto.concat(" ").concat(coord);
+                document.getElementById("coordenadas").value = texto;
+                desenhar();  
+            } else{
+                document.getElementById("coordenadas").value = coord;
+            }
+        }
 
-window.requestAnimationFrame(render);
+
     </script>  
 </html>
