@@ -15,7 +15,8 @@
             <button type="button" onclick="desenhar()" >Desenhar</button>
             <button type="button" onclick="apagar()">Apagar Retas</button>
             <button type="button" onclick="mudarVista()" id="vista">3D</button>
-    </body>
+        </div>
+    </body oncontextmenu="return false;">
     <script type="text/javascript" src="js/three.js"></script>
     <script type="text/javascript" src="js/lineMP.js"></script>   
     <!-- Código Javascript que executa as funções solicitadas -->    
@@ -42,8 +43,8 @@
             document.body.appendChild(renderer.domElement);                           //Adicionar na página HTML o elemento
         } 
 
-        //Criar o plano
-        function createPlane(){
+         //Criar o plano
+         function createPlane(){
             const planoGeometria = new THREE.PlaneGeometry(planoSize,planoSize);            //Geometria do Plano
             const planoMaterial = new THREE.MeshBasicMaterial(                              //Propriedades do plano
                 {
@@ -52,11 +53,29 @@
                 }
             )
             const plano = new THREE.Mesh(planoGeometria, planoMaterial);                    //Cria o plano
-            plano.position.x=0;                                                             //posicionando o plano em posição inicial
-            plano.position.y=0;                                                             //de modo a começar junto dos eixos 
+            plano.position.x=centerRef[0];                                                  //posicionando o plano em posição inicial
+            plano.position.y=centerRef[1];                                                  //de modo a começar junto dos eixos 
+            plano.position.z=centerRef[2];
             plano.name="Plano";                                                             //Definir nome para o plano
             cena.add(plano);                                                                //e adiciona na cena
+            
+            let planoGeometria2 = new THREE.PlaneGeometry(planoSize,planoSize/6);            //Geometria do Plano
+            let planoMaterial2 = new THREE.MeshBasicMaterial(                              //Propriedades do plano
+                {
+                    color: 0xA8B5FF,
+                    side: THREE.DoubleSide
+                }
+            )
+            let plano2 = new THREE.Mesh(planoGeometria2, planoMaterial2);                    //Cria o plano
+            plano2.position.x=centerRef[0];                                                  //posicionando o plano em posição inicial
+            plano2.position.y=centerRef[1]-planoSize;                                                  //de modo a começar junto dos eixos 
+            plano2.position.z=centerRef[2]+10;
+            plano2.rotation.z =0;
+            plano2.rotation.x=90;
+            plano2.name="Plano";                                                             //Definir nome para o plano
+            cena.add(plano2);                                                                //e adiciona na cena
         }
+
 
         //Gerar Linhas Verticais
         function createPointGrid(){
@@ -229,6 +248,24 @@
             renderer.render(cena,camera);                                                       //Atualiza a imagem da camera
         }
 
+        //Criar Camera de Vista 2D Topo
+        function createViewport2DTop(){           
+            //Criar o ViewPort 2D
+            camera = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 1, 2000);
+            camera.position.x = 0;                                                              //Posiciona a Camera no eixo x
+            camera.position.y = 90;                                                             //Posiciona a Camera no eixo y
+            camera.position.z = 0;                                                              //Posiciona a camera no eixo z
+            camera.lookAt(cena.position);                                                       //Coloca camera a observar a possição da cena
+            camera.name="Topo";                                                                   //Atribuir o nome 3D na camera
+            cena.add(camera);                                                                   //Adiciona a camera na cena
+            // Luz para 2D
+            light = new THREE.HemisphereLight(0xffffff, 0xE2E2E2, 0.8);                         //Iluminação para se conseguir perceber os cubos
+            light.name = "Luz";                                                                 //Atribuir o nome à iluminação
+            cena.add(light);                                                                    //Adicionar na cena
+            renderer.render(cena,camera);                                                       //Atualiza a imagem da camera
+            
+        }
+
         //Criar Camera de Vista 3D
         function createViewport3D(){
             //Criar o viewPort 3D
@@ -245,30 +282,50 @@
             light.position.x = 20;                                                              //Posições da iliminação
             light.position.y= 30;
             light.position.z= 100;
-            //light = new THREE.HemisphereLight(0xffffff, 0xE2E2E2, 0.8);                         //Iluminação para se conseguir perceber os cubos
-            //light.name = "Luz";                                                                 //Atribuir o nome à iluminação
             cena.add(light);                                                                    //Adicionar na cena
             renderer.render(cena,camera);                                                       //Atualiza a imagem da camera
         }
 
-        //Função para mudar a vista da câmara
-        function mudarVista(){
+        //Função para remover vista
+        function removeVista(){
             light = cena.getObjectByName("Luz");                                            //Procura por existencia de objtos com o nome "Luz"
             if(light)
-                cena.remove(light);                                                         //Remove da cena caso existam
-            camera = cena.getObjectByName("2D");                                            //Procura por existencia de Vistas 2D
-            if(camera){                                                                     //Se existir vista
-                cena.remove(camera);                                                        //Remover Camera 2D existente
-                createViewport3D();                                                         //Cria Vista 3D
-                let bt = document.getElementById("vista");                                  //Procura o Botão de alteração de vista
-                bt.innerHTML = "2D";                                                        //e altera o texto para 2D
-            } else {                                                                        //Caso não exista vista 2D
-                camera = cena.getObjectByName("3D");                                        //Procura por existencia de vista 3D
-                if(camera)                                                                  //Se existir vista   
-                    cena.remove(camera);                                                    //Remover Camera 3D existente
-                createViewport2D();                                                         //Cria vista 2D
-                let bt = document.getElementById("vista");                                  //procura o botão de alteração de vista
-                bt.innerHTML = "3D";                                                        //e altera o texto para 3D
+                cena.remove(light); 
+            camera = cena.getObjectByName("2D") || cena.getObjectByName("3D") || cena.getObjectByName("Topo");  //Procura por existencia de cameras
+            if(camera){
+                cena.remove(camera);                                                        //Remover Camera da cena
+            }
+            return camera.name;
+        }
+
+        function mudarVistaAlternativa(){
+            let vista = removeVista();
+            let bt = document.getElementById("vista");                                      //Procura o Botão de alteração de vista
+            if(vista == "Topo"){                                                            //Se foi a vista 2D Topo removida
+                createViewport2D();                                                         //Cria a vista 2D e volta a reativar 
+                bt.innerHTML = "2D";                                                        //o botão de mudança de vista
+                bt.disabled = false;
+            } else {
+                createViewport2DTop();                                                      //Caso contrário cria a vista de Topo
+                bt.innerHTML = "Topo";                                                      //e desativa o botão de mudança de vista
+                bt.disabled = true;
+            }
+        }
+
+        //Função para mudar a vista da câmara
+        function mudarVista(){
+            let vista = removeVista();
+            let bt = document.getElementById("vista");                                      //Procura o Botão de alteração de vista
+            if( vista === "2D"){
+                createViewport3D();                                                         //Cria viewport 3D pois removeu a vista 2D
+                bt.innerHTML = vista;                                                       //e altera o texto para 2D
+            } else if( vista === "3D"){
+                createViewport2D();                                                         //Cria viewport 2D pois removeu a vista 3D
+                bt.innerHTML = vista;                                                       //e altera o texto para 3D
+            } else{
+                createViewport2D();                                                         //Cria viewport 2D pois removeu vista 2D Topo
+                bt.innerHTML = "3D";  
+                bt.disabled = false;
             }
         }
 
@@ -289,22 +346,24 @@
         function desenhar(){
             let texto = document.getElementById("coordenadas").value;              //Ler Conteudo do formulário
             let coord = texto.split(" ");                                          //Dividir o texto em coordenadas
-            let x1 = Number(coord[0]);                                             //Definir x1
-            let y1 = Number(coord[1]);                                             //Definir y1
-            let x2 = Number(coord[2]);                                             //Definir x2
-            let y2 = Number(coord[3]);                                             //Definir y2
-            let pontos = lineMP([x1,y1],[x2,y2]);                                  //Obter Pontos a desenhar       
-            //Desenhar os pontos gerados
-            for(let i = 0; i< pontos.length; i++){
-                let ponto = pontos[i];                                             //Obter Array das Coordenadas no Array
-                let x = ponto[0];                                                  //Definir X com o primeiro valor do Array de Coordenadas
-                let y = ponto[1];                                                  //Definir Y com o segundo  valor no array de coordenadas
-                x = x*fatPixelSize+centerRef[0];                                   //Calcular as posições x e y
-                y = y*fatPixelSize+centerRef[1];                                   //onde o cubo vai ser colocado
-                drawPixel(x,y);                                                    //Desenhar o Pixel na cena
-                renderer.render(cena,camera);                                      //Atualiza a Cena na camera
+            if(coord.length == 4){
+                let x1 = Number(coord[0]);                                             //Definir x1
+                let y1 = Number(coord[1]);                                             //Definir y1
+                let x2 = Number(coord[2]);                                             //Definir x2
+                let y2 = Number(coord[3]);                                             //Definir y2
+                let pontos = lineMP([x1,y1],[x2,y2]);                                  //Obter Pontos a desenhar       
+                //Desenhar os pontos gerados
+                for(let i = 0; i< pontos.length; i++){
+                    let ponto = pontos[i];                                             //Obter Array das Coordenadas no Array
+                    let x = ponto[0];                                                  //Definir X com o primeiro valor do Array de Coordenadas
+                    let y = ponto[1];                                                  //Definir Y com o segundo  valor no array de coordenadas
+                    x = x*fatPixelSize+centerRef[0];                                   //Calcular as posições x e y
+                    y = y*fatPixelSize+centerRef[1];                                   //onde o cubo vai ser colocado
+                    drawPixel(x,y);                                                    //Desenhar o Pixel na cena
+                    renderer.render(cena,camera);                                      //Atualiza a Cena na camera
+                }
+                limparSelecao();                                                       //Colocar os pontos clicados ao estado Original
             }
-            limparSelecao();                                                       //Colocar os pontos clicados ao estado Original
         }
 
         //Desenhar o Pixel nas posiçoes fornecidas
@@ -352,15 +411,22 @@
                 case 67:                                                                                    //Verifica Tecla "C"
                     apagar();                                                                               //Apaga Linhas
                     break;
+                case 84:                                                                                    //Verifica tecla "T"
+                    mudarVistaAlternativa();                                                                //Muda para a vista 2D topo
+                    break;
             }
         }
 
         //Função para aceitar os eventos do rato para desenhar
-        window.addEventListener( 'mousedown', onMouseDown, false );
+        window.addEventListener( 'pointerdown', onMouseDown, false );
         function onMouseDown( event ) {
-            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;                                        //Obter coordenada x clicada com o rato
-            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;                                     //Obter coordenada y clicada com o rato
-            obterPontoClicado();                                                                            //Processar evento do rato
+            if(event.button==2){
+                mudarVistaAlternativa();
+            } else{
+                mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;                                        //Obter coordenada x clicada com o rato
+                mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;                                     //Obter coordenada y clicada com o rato
+                obterPontoClicado();                                                                            //Processar evento do rato
+            }
         }
 
         //Obter as posições do ecrã clicadas pelo rato
@@ -406,6 +472,10 @@
         }
 
         init();
+
+        document.oncontextmenu = function() {                                                               //Remove o menu de contexto do botão direito
+            return false;
+        }
 
 
     </script>  
