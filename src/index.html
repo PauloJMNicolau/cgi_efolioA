@@ -24,7 +24,7 @@
 
         //Variaveis da Cena
         let fatPixelSize = 6;                                               //Tamanho do Pixel "Gordo"
-        let centerRef = [0,0,0];                                            //Ponto de Referencial dos eixos
+        let centerRef = [0,0,-150];                                            //Ponto de Referencial dos eixos
         let limite = 21*fatPixelSize;                                       //Limite maximo dos eixos
         let cena= {};                                                       //Variavel para a cena
         let camera;                                                         //Variavel para a camera
@@ -33,6 +33,7 @@
         let light = {}                                                      //Luz para se perceber a diferença de faces no 3D
         const raycaster = new THREE.Raycaster();                            //Variavel para area clicavel
         const mouse = new THREE.Vector2();                                  //Variavel para as coordenadas do rato
+        const vectorRef = new THREE.Vector3(centerRef[0], centerRef[1], centerRef[2]);
 
         //Criar a Cena
         function createScene(){
@@ -68,8 +69,8 @@
             )
             let plano2 = new THREE.Mesh(planoGeometria2, planoMaterial2);                    //Cria o plano
             plano2.position.x=centerRef[0];                                                  //posicionando o plano em posição inicial
-            plano2.position.y=centerRef[1]-planoSize;                                                  //de modo a começar junto dos eixos 
-            plano2.position.z=centerRef[2]+10;
+            plano2.position.y=centerRef[1]-planoSize/2;                                                  //de modo a começar junto dos eixos 
+            plano2.position.z=centerRef[2]+20;
             plano2.rotation.z =0;
             plano2.rotation.x=90;
             plano2.name="Plano";                                                             //Definir nome para o plano
@@ -235,11 +236,12 @@
         function createViewport2D(){
             //Criar o ViewPort 2D
             camera = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 1, 2000);
-            camera.position.x = 0;                                                              //Posiciona a Camera no eixo x
-            camera.position.y = 0;                                                              //Posiciona a Camera no eixo y
-            camera.position.z = 50;                                                             //Posiciona a camera no eixo z
-            camera.lookAt(cena.position);                                                       //Coloca camera a observar a possição da cena
+            camera.position.x = centerRef[0];                                                   //Posiciona a Camera no eixo x
+            camera.position.y = centerRef[1];                                                   //Posiciona a Camera no eixo y
+            camera.position.z = centerRef[2]+50;                                                //Posiciona a camera no eixo z
+            camera.lookAt(vectorRef);                                                           //Coloca camera a observar a possição da cena
             camera.name="2D";                                                                   //Atribuir o nome 3D na camera
+            camera.zoom = 0.5;
             cena.add(camera);                                                                   //Adiciona a camera na cena
             // Luz para 2D
             light = new THREE.AmbientLight(0xffffff);                                           //Iliminação para se conseguir ver a cor do material
@@ -252,11 +254,11 @@
         function createViewport2DTop(){           
             //Criar o ViewPort 2D
             camera = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 1, 2000);
-            camera.position.x = 0;                                                              //Posiciona a Camera no eixo x
-            camera.position.y = 90;                                                             //Posiciona a Camera no eixo y
-            camera.position.z = 0;                                                              //Posiciona a camera no eixo z
-            camera.lookAt(cena.position);                                                       //Coloca camera a observar a possição da cena
-            camera.name="Topo";                                                                   //Atribuir o nome 3D na camera
+            camera.position.x = centerRef[0];                                                   //Posiciona a Camera no eixo x
+            camera.position.y = centerRef[1]+90;                                                //Posiciona a Camera no eixo y
+            camera.position.z = centerRef[2];                                                   //Posiciona a camera no eixo z
+            camera.lookAt(vectorRef);                                                           //Coloca camera a observar a possição da cena
+            camera.name="Topo";                                                                 //Atribuir o nome 3D na camera
             cena.add(camera);                                                                   //Adiciona a camera na cena
             // Luz para 2D
             light = new THREE.HemisphereLight(0xffffff, 0xE2E2E2, 0.8);                         //Iluminação para se conseguir perceber os cubos
@@ -270,10 +272,10 @@
         function createViewport3D(){
             //Criar o viewPort 3D
             camera = new THREE.OrthographicCamera(window.innerWidth/ -6, window.innerWidth/6, window.innerHeight / 6, window.innerHeight / -6, 2, 2000);
-            camera.position.x = -20;                                                            //Posiciona a Camera no eixo x
-            camera.position.y = 25;                                                             //Posiciona a Camera no eixo y
-            camera.position.z = 80;                                                             //Posiciona a camera no eixo z
-            camera.lookAt(cena.position);                                                       //Coloca camera a observar a possição da cena
+            camera.position.x = centerRef[0]-20;                                                //Posiciona a Camera no eixo x
+            camera.position.y = centerRef[1]+25;                                                //Posiciona a Camera no eixo y
+            camera.position.z = centerRef[2]+80;                                                //Posiciona a camera no eixo z
+            camera.lookAt(vectorRef);                                                           //Coloca camera a observar a possição da cena
             camera.name="3D";                                                                   //Atribuir o nome 3D na camera
             cena.add(camera);                                                                   //Adiciona a camera na cena
             // Luz para 3D
@@ -377,7 +379,7 @@
             let pixel = new THREE.Mesh(geometriaPixel, materialPixel);                                      //Criar Cubo
             pixel.position.x=x;                                                                             //Posiciona o cubo em x
             pixel.position.y=y;                                                                             //Posiciona o cubo em y
-            pixel.position.z=10;                                                                            //Posiciona o cubo em z
+            pixel.position.z=centerRef[2]+5;                                                                //Posiciona o cubo em z
             pixel.name="Pixel";                                                                             //Define o nome "Pixel" para o cubo
             cena.add(pixel);                                                                                //Adicionar Cubo na cena
         }
@@ -477,6 +479,19 @@
             return false;
         }
 
+        //Função para controlar o zoom da camera
+        document.addEventListener("wheel", changeZoom);
+        function changeZoom(event) {
+            if(event.deltaY >0 ){                                                                           //Opção de Aumentar o Zoom
+                if(camera.zoom < 10)                                                                        //Limita o aumento do zoom da camara
+                    camera.zoom++
+            } else {                                                                                        //Opção de diminuir zoom
+                if(camera.zoom > 1)                                                                         //Evita que a camera inverta a imagem ao diminuir
+                    camera.zoom--;                                                                          //o zoom de mais
+            }
+            camera.updateProjectionMatrix();
+            renderer.render(cena,camera);
+        } 
 
     </script>  
 </html>
