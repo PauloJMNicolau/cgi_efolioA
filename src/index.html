@@ -265,15 +265,15 @@
         //Criar Camera de Vista 3D
         function createViewport3D(){
             //Criar o viewPort 3D
-            camera = new THREE.OrthographicCamera(window.innerWidth/ -6, window.innerWidth/6, window.innerHeight / 6, window.innerHeight / -6, 2, 2000);
-            camera.position.x = centerRef[0]-20;                                                //Posiciona a Camera no eixo x
-            camera.position.y = centerRef[1]+25;                                                //Posiciona a Camera no eixo y
-            camera.position.z = centerRef[2]+80;                                                //Posiciona a camera no eixo z
+            camera = new THREE.PerspectiveCamera(75, innerWidth / window.innerHeight, 1,2000);
+            camera.position.x = centerRef[0]-90;                                                //Posiciona a Camera no eixo x
+            camera.position.y = centerRef[1]+90;                                                //Posiciona a Camera no eixo y
+            camera.position.z = centerRef[2]+200;                                                //Posiciona a camera no eixo z
             camera.lookAt(vectorRef);                                                           //Coloca camera a observar a possição da cena
             camera.name="3D";                                                                   //Atribuir o nome 3D na camera
             cena.add(camera);                                                                   //Adiciona a camera na cena
             // Luz para 3D
-            const light = new THREE.DirectionalLight( 0xffffff, 0.8 );                          //Iluminação para se conseguir perceber os cubos
+            const light = new THREE.DirectionalLight( 0xff00ff, 0.8 );                          //Iluminação para se conseguir perceber os cubos
             light.name = "Luz";                                                                 //Atribuir o nome à iluminação
             light.position.x = 20;                                                              //Posições da iliminação
             light.position.y= 30;
