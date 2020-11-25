@@ -1,4 +1,16 @@
-  //Ficheiro lineMP.js
+/*
+    Trabalho:       eFólio A - Computação Gráfica
+    Autor:          Paulo Nicolau
+    Número Aluno:   1800465
+    Curso:          Licenciatura em Engenharia Informática
+
+    Este código estará disponivel de forma pública no repositório
+    GitHub https://github.com/PauloJMNicolau/cgi_efolioA
+    após o dia 15 de Dezembro de 2020 em licença MIT
+
+*/
+
+//Ficheiro lineMP.js
 
 function lineMP(pontoA, pontoB){
     let x1 = pontoA[0];

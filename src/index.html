@@ -1,3 +1,14 @@
+<!--
+    Trabalho:       eFólio A - Computação Gráfica
+    Autor:          Paulo Nicolau
+    Número Aluno:   1800465
+    Curso:          Licenciatura em Engenharia Informática
+
+    Este código estará disponivel de forma pública no repositório
+    GitHub https://github.com/PauloJMNicolau/cgi_efolioA
+    após o dia 15 de Dezembro de 2020 em licença MIT
+
+-->
 <!DOCTYPE html>
 <html>  
     <head>  
@@ -230,7 +241,7 @@
         //Criar Camera de Vista 2D
         function createViewport2D(){
             //Criar o ViewPort 2D
-            camera = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 1, 2000);
+            camera = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 30,50);
             camera.position.x = centerRef[0];                                                   //Posiciona a Camera no eixo x
             camera.position.y = centerRef[1];                                                   //Posiciona a Camera no eixo y
             camera.position.z = centerRef[2]+50;                                                //Posiciona a camera no eixo z
@@ -247,7 +258,8 @@
         //Criar Camera de Vista 2D Topo
         function createViewport2DTop(){           
             //Criar o ViewPort 2D
-            camera = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 1, 2000);
+            camera = new THREE.OrthographicCamera(planoSize, planoSize, planoSize, planoSize, 1000, 3000);
+            camera = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 1, 300);
             camera.position.x = centerRef[0];                                                   //Posiciona a Camera no eixo x
             camera.position.y = centerRef[1]+90;                                                //Posiciona a Camera no eixo y
             camera.position.z = centerRef[2];                                                   //Posiciona a camera no eixo z
@@ -265,7 +277,7 @@
         //Criar Camera de Vista 3D
         function createViewport3D(){
             //Criar o viewPort 3D
-            camera = new THREE.PerspectiveCamera(75, innerWidth / window.innerHeight, 1,2000);
+            camera = new THREE.PerspectiveCamera(75, innerWidth / window.innerHeight, 1,350);
             camera.position.x = centerRef[0]-90;                                                //Posiciona a Camera no eixo x
             camera.position.y = centerRef[1]+90;                                                //Posiciona a Camera no eixo y
             camera.position.z = centerRef[2]+200;                                                //Posiciona a camera no eixo z
@@ -356,7 +368,7 @@
                     x = x*fatPixelSize+centerRef[0];                                   //Calcular as posições x e y
                     y = y*fatPixelSize+centerRef[1];                                   //onde o cubo vai ser colocado
                     drawPixel(x,y);                                                    //Desenhar o Pixel na cena
-                    renderer.render(cena,camera);                                      //Atualiza a Cena na camera
+                    renderer.render(cena,camera);                                      //Atualiza a Cena na camera                    
                 }
                 limparSelecao();                                                       //Colocar os pontos clicados ao estado Original
             }
@@ -428,7 +440,7 @@
         //Função para controlar o zoom da camera
         document.addEventListener("wheel", changeZoom);
         function changeZoom(event) {
-            if(event.deltaY >0 ){                                                                           //Opção de Aumentar o Zoom
+            if(event.deltaY <0 ){                                                                           //Opção de Aumentar o Zoom
                 if(camera.zoom < 10)                                                                        //Limita o aumento do zoom da camara
                     camera.zoom++
             } else {                                                                                        //Opção de diminuir zoom
