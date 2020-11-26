@@ -44,14 +44,16 @@
         let light = {}                                                      //Luz para se perceber a diferença de faces no 3D
         const raycaster = new THREE.Raycaster();                            //Variavel para area clicavel
         const mouse = new THREE.Vector2();                                  //Variavel para as coordenadas do rato
-        const vectorRef = new THREE.Vector3(centerRef[0], centerRef[1], centerRef[2]); //vetor de referência para as camaras
-
+        const vectorRef = new THREE.Vector3(centerRef[0], centerRef[1], centerRef[2]); //vetor de referência para as camara
+        
         //Criar a Cena
         function createScene(){
             cena = new THREE.Scene();                                                 //Criar a cena
             //Render da Imagem
-            renderer = new THREE.WebGLRenderer();                                     //Criar o Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });                  //Criar o Renderer com definição de anti-aliasing
+            renderer.physicallyCorrectLights = true;                                  //Corrigir as imperfeições dos desenhos
             renderer.setSize(window.innerWidth, window.innerHeight);                  //Definir Tamanho do Renderer
+            renderer.setPixelRatio(window.devicePixelRatio);                          //Definir o ratio dos pixel no renderer
             document.body.appendChild(renderer.domElement);                           //Adicionar na página HTML o elemento           
         } 
 
@@ -242,6 +244,7 @@
         function createViewport2D(){
             //Criar o ViewPort 2D
             camera = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 30,50);
+            camera.aspect = window.innerWidth / window.innerHeight;
             camera.position.x = centerRef[0];                                                   //Posiciona a Camera no eixo x
             camera.position.y = centerRef[1];                                                   //Posiciona a Camera no eixo y
             camera.position.z = centerRef[2]+50;                                                //Posiciona a camera no eixo z
@@ -258,8 +261,8 @@
         //Criar Camera de Vista 2D Topo
         function createViewport2DTop(){           
             //Criar o ViewPort 2D
-            camera = new THREE.OrthographicCamera(planoSize, planoSize, planoSize, planoSize, 1000, 3000);
             camera = new THREE.OrthographicCamera(window.innerWidth/ -5, window.innerWidth/5, window.innerHeight / 5, window.innerHeight / -5, 1, 300);
+            camera.aspect = window.innerWidth / window.innerHeight;
             camera.position.x = centerRef[0];                                                   //Posiciona a Camera no eixo x
             camera.position.y = centerRef[1]+90;                                                //Posiciona a Camera no eixo y
             camera.position.z = centerRef[2];                                                   //Posiciona a camera no eixo z
@@ -270,8 +273,7 @@
             light = new THREE.HemisphereLight(0xffffff, 0xE2E2E2, 0.8);                         //Iluminação para se conseguir perceber os cubos
             light.name = "Luz";                                                                 //Atribuir o nome à iluminação
             cena.add(light);                                                                    //Adicionar na cena
-            renderer.render(cena,camera);                                                       //Atualiza a imagem da camera
-            
+            renderer.render(cena,camera);                                                       //Atualiza a imagem da camera           
         }
 
         //Criar Camera de Vista 3D
@@ -498,7 +500,27 @@
         document.oncontextmenu = function() {                                                               //Remove o menu de contexto do botão direito
             return false;
         }
-
+        
+        //Função para atualizar proporções das cameras no redimensionamento do browser.
+        window.addEventListener("resize", updateCamera);
+        function updateCamera(event){
+            camera = cena.getObjectByName("2D") || cena.getObjectByName("3D") || cena.getObjectByName("Topo");  //Procura por existencia de cameras
+            renderer.setSize(window.innerWidth, window.innerHeight);                                            //Definir o novo Tamanho do Renderer
+            if(camera){
+                if(camera.name == "2D" || camera.name=="Topo"){                                                 //Verifica se se trata de uma camera ortográfica
+                    camera.left=window.innerWidth/-5;                                                           //Corrige as definições da camera para novas posições
+                    camera.right=window.innerWidth/5
+                    camera.top=window.innerHeight / 5
+                    camera.bottom=window.innerHeight / -5
+                    camera.aspect = window.innerWidth / window.innerHeight;                                     //Corrige o aspect ratio para as novas proporções
+                } else {                                                                                        //Caso de ser uma camera perspectiva
+                    camera.aspect = window.innerWidth / window.innerHeight;                                     //Corrige apenas o aspect ratio para as novas proporções
+                }
+                camera.updateProjectionMatrix();                                                                //Atualiza a camera
+                renderer.setPixelRatio(window.devicePixelRatio);                                                //Atualiza o Ratio dos pixel no renderer
+                renderer.render(cena,camera);                                                                   //Atualiza o renderer
+            }
+        }
 
     </script>  
 </html>
